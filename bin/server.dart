@@ -4,11 +4,12 @@
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf_static/shelf_static.dart' as shelf_static;
+
 
 Future<void> main() async {
   // If the "PORT" environment variable is set, listen to it. Otherwise, 8080.
@@ -52,8 +53,39 @@ final _router = shelf_router.Router()
   ..get('/info.json', _infoHandler)
   ..get('/sum/<a|[0-9]+>/<b|[0-9]+>', _sumHandler)
   ..get('/mul/<a|[0-9]+>/<b|[0-9]+>', _mulHandler)
-  ..post('/login', _loginHandler)
-  ..post('/register', _registerHandler);
+  ..post('/register', (Request request) async{
+      final String body = await request.readAsString();
+      // 创建文件
+      File file = File('public/user.txt');
+      print(body);
+      // 写入文件
+      file.writeAsString('$body\n', mode: FileMode.append);
+      //写入换行
+      // file.writeAsString('\n', mode: FileMode.append);
+      //跳转页面
+      return Response.seeOther('/');
+    })
+  ..post('/login', (Request request) async{
+      File file = File('public/user.txt');
+      final String body = await request.readAsString();
+      Stream<List<int>> inputStream = file.openRead();
+      var lines = utf8.decoder
+          .bind(inputStream)
+          .transform(const LineSplitter());
+      try {
+        await for (final line in lines) {
+          if (body.compareTo(line) == 0){
+            print('登录成功');
+            return Response.seeOther('/');
+          }
+        }
+      } catch (e) {
+        print(e);
+      }
+  });
+
+
+
 
 Response _helloWorldHandler(Request request) => Response.ok('Hello, World!');
 
@@ -75,7 +107,6 @@ Response _mulHandler(Request request, String a, String b) {
     },
   );
 }
-
 Response _sumHandler(Request request, String a, String b) {
   final aNum = int.parse(a);
   final bNum = int.parse(b);
