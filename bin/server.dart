@@ -51,7 +51,9 @@ final _router = shelf_router.Router()
   )
   ..get('/info.json', _infoHandler)
   ..get('/sum/<a|[0-9]+>/<b|[0-9]+>', _sumHandler)
-  ..get('/mul/<a|[0-9]+>/<b|[0-9]+>', _mulHandler);
+  ..get('/mul/<a|[0-9]+>/<b|[0-9]+>', _mulHandler)
+  ..post('/login', _loginHandler)
+  ..post('/register', _registerHandler);
 
 Response _helloWorldHandler(Request request) => Response.ok('Hello, World!');
 
@@ -73,6 +75,7 @@ Response _mulHandler(Request request, String a, String b) {
     },
   );
 }
+
 Response _sumHandler(Request request, String a, String b) {
   final aNum = int.parse(a);
   final bNum = int.parse(b);
