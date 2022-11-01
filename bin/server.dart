@@ -76,7 +76,22 @@ final _router = shelf_router.Router()
         await for (final line in lines) {
           if (body.compareTo(line) == 0){
             print('登录成功');
-            return Response.seeOther('/');
+            return Response.ok(
+              _jsonEncode({'state': "登陆成功"}),
+              headers: {
+                ..._jsonHeaders,
+                'Cache-Control': 'public, max-age=604800, immutable',
+              },
+            );
+          }else{
+            print('登录失败');
+            return Response.ok(
+              _jsonEncode({'state': "登录失败"}),
+              headers: {
+                ..._jsonHeaders,
+                'Cache-Control': 'public, max-age=604800, immutable',
+              },
+            );
           }
         }
       } catch (e) {
